@@ -1,5 +1,21 @@
 module.exports = {
   USER_CREATED_SUCCESS: 'Data registrasi berhasil terdaftar',
   USER_EMAIL_EXISTS: 'Email sudah terdaftar',
-  SERVER_ERROR: 'Terjadi kesalahan server'
+  SERVER_ERROR: 'Terjadi kesalahan server',
+  MESSAGE_LIMITYER: 'Terlalu banyak percobaan login. Silakan coba lagi dalam 15 menit.',
+  IVALIDE_TOKEN: 'Token tidak valid',
+  TOKEN_NOTFOUND: 'Token tidak ditemukan',
+  FORBIDEN_ACCESS: 'Forbidden: Akses hanya untuk admin',
+  SEVER_ERROR_ROLE: 'Server error saat cek role',
+  ERROR_CHECK_ROLE_ADMIN: 'Error cek role admin:',
+  AUTHOR_NO_LOGIN: 'Unauthorized: Silakan login dulu',
+  SUCCESS_ADD_ADMIN: 'Admin berhasil ditambahkan',
+  FAILED_ADD_ADMIN: 'Gagal menambahkan admin',
+  FAILED_GET_DATA_ADMIN: 'Gagal menambahkan admin',
+  EMAIL_NOT_FOUND: 'Email tidak ditemukan',
+  ACCOUNT_ALREADY_REGISTERED: 'Akun sudah terdaftar',
+  REGISTRATION_SUCCESS: 'Registrasi berhasil',
+  ACCOUNT_NOT_ACTIVE: 'Akun belum aktif',
+  INVALID_PASSWORD: 'Password salah',
+  LOGIN_SUCCESS: 'Login berhasil',
 };

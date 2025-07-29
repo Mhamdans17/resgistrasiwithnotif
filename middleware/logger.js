@@ -26,7 +26,7 @@ const logger = (req, res, next) => {
     console.log(`[${new Date().toISOString()}] | Port ${port} | ${req.method} ${req.originalUrl}`);
     console.log('Request Params:', req.params);
     console.log('Request Query :', req.query);
-    console.log('Request Body  :', maskSensitiveFields(req.body)); // 👈 pakai masker
+    console.log('Request Body  :', maskSensitiveFields(req.body));
 
     if (responseBody) {
       try {

@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
+const message = require('../constants/messages');
 const secretKey = process.env.JWT_SECRET;
 
 const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Token tidak ditemukan' });
+    return res.status(401).json({ message: message.TOKEN_NOTFOUND });
   }
 
   const token = authHeader.split(' ')[1];
@@ -13,11 +14,11 @@ const auth = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, secretKey);
 
-    req.user = decoded; // ⬅️ Langsung ambil semua isi token
+    req.user = decoded;
 
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Token tidak valid' });
+    return res.status(401).json({ message: message.IVALIDE_TOKEN });
   }
 };
 
