@@ -1,21 +1,22 @@
 const db = require('../config/db');
 
-exports.findUserByEmail = (email) => {
-  return new Promise((resolve, reject) => {
-    const sql = 'SELECT id FROM users WHERE email = ?';
-    db.query(sql, [email], (err, result) => {
-      if (err) return reject(err);
-      resolve(result[0]);
-    });
-  });
+async function isAdminEmail(email) {
+  const sql = 'SELECT 1 FROM admin_list WHERE email = ? LIMIT 1';
+  const [rows] = await db.query(sql, [email]);
+  return rows.length > 0;
+}
+
+exports.findUserByEmail = async (email) => {
+  const sql = 'SELECT id FROM users WHERE email = ?';
+  const [rows] = await db.query(sql, [email]);
+  return rows[0];
 };
 
-exports.createUser = ({ name, email, age }) => {
-  return new Promise((resolve, reject) => {
-    const sql = 'INSERT INTO users (name, email, age) VALUES (?, ?, ?)';
-    db.query(sql, [name, email, age], (err, result) => {
-      if (err) return reject(err);
-      resolve(result.insertId);
-    });
-  });
+exports.createUser = async ({ name, email, age }) => {
+  const isAdmin = await isAdminEmail(email);
+  const role = isAdmin ? 'admin' : 'user';
+
+  const sql = 'INSERT INTO users (name, email, age, role) VALUES (?, ?, ?, ?)';
+  const [result] = await db.query(sql, [name, email, age, role]);
+  return result.insertId;
 };

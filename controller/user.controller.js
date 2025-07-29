@@ -1,10 +1,19 @@
 const userService = require('../services/user.service');
+const messages = require('../constants/messages');
+const { userSchema } = require('../validation/user.validation');
+const { sendEmail } = require('../services/email.service');
+const responseCode = require('../constants/responsecode');
+
 
 exports.createUser = async (req, res) => {
     const {name, email, age} = req.body;
 
-    if(!name || !email || !age) {
-        return res.status(400).json({ message: 'Lengkapi semua data' });
+    const { error } = userSchema.validate({ name, email, age });
+    if (error) {
+        return res.status(400).json({
+        message: error.details[0].message,
+        responseCode: responseCode.BAD_REQUEST,
+        });
     }
 
     try {
@@ -14,9 +23,12 @@ exports.createUser = async (req, res) => {
         }
 
         const userId = await userService.createUser({ name, email, age });
+
+        await sendEmail(email, name);
+
         return res.status(200).json({
         message: messages.USER_CREATED_SUCCESS,
-        repsonseCode: '200',
+        repsonseCode: responseCode.SUCCESS,
         accepData: [
             {
             nama: name,
