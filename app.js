@@ -1,7 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const logger = require('./middleware/logger');
+
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
 const userRoutes = require('./routes/user');
 const authRoutes = require('./routes/auth');

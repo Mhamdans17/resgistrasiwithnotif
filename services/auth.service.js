@@ -22,12 +22,12 @@ exports.completeRegistrationService = async (email, password) => {
 
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-  return { message: message.REGISTRATION_SUCCESS, token };
+  return { message: message.REGISTRATION_SUCCESS};
 };
 
 //Service Login
 exports.loginService = async (email, password) => {
-  const [userRows] = await db.query('SELECT id, name FROM users WHERE email = ?', [email]);
+  const [userRows] = await db.query('SELECT id, name, role FROM users WHERE email = ?', [email]);
   if (userRows.length === 0) {
     throw { status: 400, message: message.EMAIL_NOT_FOUND };
   }
@@ -52,7 +52,8 @@ exports.loginService = async (email, password) => {
     user: {
       id: user.id,
       name: user.name,
-      email
+      email,
+      role: user.role
     }
   };
 };

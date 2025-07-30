@@ -2,5 +2,6 @@ CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100),
   email VARCHAR(100) UNIQUE,
-  age INT
+  age INT,
+  role VARCHAR(50) DEFAULT 'user'
 );
