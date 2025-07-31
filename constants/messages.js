@@ -18,4 +18,8 @@ module.exports = {
   ACCOUNT_NOT_ACTIVE: 'Akun belum aktif',
   INVALID_PASSWORD: 'Password salah',
   LOGIN_SUCCESS: 'Login berhasil',
+  FORGOT_PASSWORD_TOKEN_CREATED: 'Token reset password berhasil dibuat',
+  INVALID_RESET_TOKEN: 'Token reset password tidak valid',
+  RESET_TOKEN_EXPIRED: 'Token reset password sudah kadaluarsa',
+  PASSWORD_RESET_SUCCESS: 'Password berhasil direset',
 };

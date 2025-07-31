@@ -2,20 +2,35 @@ const logger = (req, res, next) => {
   const start = Date.now();
   const port = process.env.PORT || 3000;
   const originalSend = res.send;
-
   let responseBody;
 
-  const maskSensitiveFields = (obj, keysToMask = ['password']) => {
-    if (!obj) return obj;
-    const masked = { ...obj };
-    for (const key of keysToMask) {
-      if (key in masked) masked[key] = '************';
+  const maskSensitiveFields = (obj, keysToMask = ['password', 'token']) => {
+    if (!obj || typeof obj !== 'object') return obj;
+
+    const masked = Array.isArray(obj) ? [...obj] : { ...obj };
+
+    for (const key in masked) {
+      if (!Object.prototype.hasOwnProperty.call(masked, key)) continue;
+
+      const value = masked[key];
+
+      if (keysToMask.includes(key)) {
+        if (typeof value === 'string' && key === 'token') {
+          masked[key] = `${value.slice(0, 10)}...${value.slice(-5)}`;
+        } else {
+          masked[key] = '************';
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        masked[key] = maskSensitiveFields(value, keysToMask);
+      }
     }
+
     return masked;
   };
 
   res.send = function (body) {
-    responseBody = body;
+    // Simpan response body (asli atau JSON string)
+    responseBody = typeof body === 'object' ? JSON.stringify(body) : body;
     res.send = originalSend;
     return res.send(body);
   };
@@ -31,7 +46,7 @@ const logger = (req, res, next) => {
     if (responseBody) {
       try {
         const parsedBody = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
-        console.log('Response Body :', parsedBody);
+        console.log('Response Body :', maskSensitiveFields(parsedBody));
       } catch (e) {
         console.log('Response Body :', responseBody);
       }
@@ -42,6 +57,5 @@ const logger = (req, res, next) => {
 
   next();
 };
-
 
 module.exports = logger;
