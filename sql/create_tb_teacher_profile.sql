@@ -1,6 +1,6 @@
-CREATE TABLE teacher_profile(
+CREATE TABLE teacher_profiles(
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE, 
     nip VARCHAR(50),
     phone VARCHAR(50),
     address TEXT,
