@@ -29,7 +29,6 @@ const logger = (req, res, next) => {
   };
 
   res.send = function (body) {
-    // Simpan response body (asli atau JSON string)
     responseBody = typeof body === 'object' ? JSON.stringify(body) : body;
     res.send = originalSend;
     return res.send(body);
