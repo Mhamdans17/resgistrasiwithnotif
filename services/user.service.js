@@ -71,10 +71,18 @@ exports.getUserWithProfile = async (userId) => {
     return rows[0] || null;
 };
 
-// Sekalian update & ambil data
 exports.updateAndGetTeacherProfile = async (userId, profileData) => {
     await this.updateTeacherProfile(userId, profileData);
     return await this.getUserWithProfile(userId);
+};
+
+exports.getUserById = async (userId) => {
+    const [rows] = await db.query(
+        `SELECT id, name, email, role FROM users WHERE id = ?`,
+        [userId]
+    );
+
+    return rows[0] || null;
 };
 
 
