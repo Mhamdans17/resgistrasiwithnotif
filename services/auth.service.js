@@ -7,12 +7,12 @@ const crypto = require('crypto');
 //Service activate email
 exports.completeRegistrationService = async (email, password) => {
   const [userRows] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-  if (userRows.length === 0) throw { status: 400, message:  message.EMAIL_NOT_FOUND };
+  if (userRows.length === 0) throw { status: 400, message:  message.USER.EMAIL_NOT_FOUND };
 
   const userId = userRows[0].id;
 
   const [authRows] = await db.query('SELECT id FROM user_auth WHERE user_id = ?', [userId]);
-  if (authRows.length > 0) throw { status: 400, message: message.ACCOUNT_ALREADY_REGISTERED };
+  if (authRows.length > 0) throw { status: 400, message: message.USER.ACCOUNT_ALREADY_REGISTERED };
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -23,7 +23,7 @@ exports.completeRegistrationService = async (email, password) => {
 
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-  return { message: message.REGISTRATION_SUCCESS};
+  return { message: message.USER.REGISTRATION_SUCCESS};
 };
 
 //Service Login

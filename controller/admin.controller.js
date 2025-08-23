@@ -12,9 +12,9 @@ exports.addAdmin = async (req, res) => {
   try {
     const { email } = value; 
     const result = await addAdminEmail(email);
-    res.status(200).json({ message: message.SUCCESS_ADD_ADMIN, data: result });
+    res.status(200).json({ message: message.ADMIN.SUCCESS_ADD_ADMIN, data: result });
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message || message.FAILED_ADD_ADMIN });
+    res.status(err.status || 500).json({ message: err.message || message.ADMIN.FAILED_ADD_ADMIN });
   }
 };
 
@@ -23,6 +23,6 @@ exports.listAdmins = async (_req, res) => {
     const admins = await getAllAdmins();
     res.status(200).json(admins);
   } catch (err) {
-    res.status(500).json({ message: message.FAILED_GET_DATA_ADMIN });
+    res.status(500).json({ message: message.ADMIN.FAILED_GET_DATA_ADMIN });
   }
 };

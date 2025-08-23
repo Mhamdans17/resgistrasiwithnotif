@@ -20,7 +20,7 @@ exports.createUser = async (req, res) => {
     try {
         const existingUser = await userService.findUserByEmail(email);
         if (existingUser){
-            return res.status(400).json({ message: messages.USER_EMAIL_EXISTS });
+            return res.status(400).json({ message: messages.USER.USER_EMAIL_EXISTS });
         }
 
         const userId = await userService.createUser({ name, email, age });
@@ -28,7 +28,7 @@ exports.createUser = async (req, res) => {
         await sendWelcomeEmail(email, name);
 
         return res.status(200).json({
-        message: messages.USER_CREATED_SUCCESS,
+        message: messages.USER.USER_CREATED_SUCCESS,
         repsonseCode: responseCode.SUCCESS,
         accepData: [
             {
@@ -39,7 +39,7 @@ exports.createUser = async (req, res) => {
         });
     } catch (error) { 
         console.error('User insert error:', error);
-        res.status(500).json({ message: messages.SERVER_ERROR })
+        res.status(500).json({ message: messages.GENERAL.SERVER_ERROR })
         
     }
 };
@@ -68,7 +68,7 @@ exports.completeTeacherProfile = async (req, res) => {
 
     } catch (err) {
         console.error('Update profile error:', err);
-        return res.status(500).json({ message: messages.SERVER_ERROR });
+        return res.status(500).json({ message: messages.GENERAL.SERVER_ERROR });
     }
 };
 

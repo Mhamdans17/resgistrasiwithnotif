@@ -29,7 +29,7 @@ exports.completeParentProfile = async (req, res) => {
     } catch (err) {
         console.error('Update wali murid error:', err);
         return res.status(500).json({
-            message: messages.SERVER_ERROR,
+            message: messages.GENERAL.SERVER_ERROR,
             responseCode: responseCode.SERVER_ERROR
         });
     }
@@ -55,7 +55,7 @@ exports.getParentProfile = async (req, res) => {
         });
     } catch (err) {
         console.error('Get wali murid error:', err);
-        return res.status(500).json({ message: messages.SERVER_ERROR });
+        return res.status(500).json({ message: messages.GENERAL.SERVER_ERROR });
     }
 };
 
@@ -79,7 +79,7 @@ exports.getParentProfileById = async (req, res) => {
         });
     } catch (err) {
         console.error('Get wali murid by ID error:', err);
-        return res.status(500).json({ message: messages.SERVER_ERROR });
+        return res.status(500).json({ message: messages.GENERAL.SERVER_ERROR });
     }
 };
 

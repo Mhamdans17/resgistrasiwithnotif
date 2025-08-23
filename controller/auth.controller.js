@@ -15,6 +15,7 @@ const {
 const jwt = require('jsonwebtoken');
 const redisClient = require('../utils/redis');
 const { sendResetSuccessEmail } = require('../services/email.service');
+const respMessage = require('../constants/messages');
 
 // COMPLETE REGISTRATION
 exports.completeRegistration = async (req, res) => {
@@ -28,10 +29,12 @@ exports.completeRegistration = async (req, res) => {
 
   try {
     const result = await completeRegistrationService(email, password);
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (err) {
     console.error('Register error:', err);
-    res.status(err.status || 500).json({ message: err.message || 'Terjadi kesalahan server' });
+    return res.status(err.status || 500).json({
+      message: err.message || respMessage.GENERAL.SERVER_ERROR,
+    });
   }
 };
 
@@ -50,7 +53,7 @@ exports.login = async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     console.error('Login error:', err);
-    res.status(err.status || 500).json({ message: err.message || 'Terjadi kesalahan server' });
+    res.status(err.status || 500).json({ message: err.message || respMessage.GENERAL.SERVER_ERROR });
   }
 };
 
@@ -59,7 +62,7 @@ exports.logout = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(400).json({ message: 'Token tidak ditemukan' });
+      return res.status(400).json({ message: respMessage.AUTH.TOKEN_NOTFOUND });
     }
 
     const token = authHeader.split(' ')[1];
@@ -71,10 +74,10 @@ exports.logout = async (req, res) => {
     // Simpan token ke Redis untuk blacklist
     await redisClient.setEx(`blacklist:${token}`, expiresIn, '1');
 
-    return res.status(200).json({ message: 'Logout berhasil' });
+    return res.status(200).json({ message: respMessage.AUTH.SUCCESS_LOGOUT });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Gagal logout' });
+    return res.status(500).json({ message: respMessage.AUTH.FAILED_LOGOUT });
   }
 };
 
@@ -92,7 +95,7 @@ exports.forgotPassword = async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     console.error('Forgot password error:', err);
-    res.status(err.status || 500).json({ message: err.message || 'Terjadi kesalahan server' });
+    res.status(err.status || 500).json({ message: err.message || respMessage.GENERAL.SERVER_ERROR });
   }
 };
 
@@ -110,7 +113,7 @@ exports.resetPassword = async (req, res) => {
     await sendResetSuccessEmail(result.email);
     res.status(200).json(result);
   } catch (err) {
-    console.error('Reset password error:', err);
+    console.error(respMessage.AUTH.ERROR_RESET_PASS, err);
     res.status(err.status || 500).json({ message: err.message || 'Terjadi kesalahan saat reset password' });
   }
 };
