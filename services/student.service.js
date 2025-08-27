@@ -1,5 +1,6 @@
 // student.service.js
 const db = require('../config/db');
+const resMessage = require('../constants/messages');
 
 exports.createStudent = async (parentId, data) => {
     const sql = `
@@ -41,7 +42,7 @@ exports.assignNis = async (id, { nisn, nis }) => {
     );
 
     if (rows.length === 0) {
-        throw new Error('Siswa tidak ditemukan');
+        throw new Error(resMessage.STUDENT.STUDENT_NOTFOUND);
     }
 
     return rows[0];

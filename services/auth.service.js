@@ -2,17 +2,38 @@ const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const message = require('../constants/messages');
+const rescode = require('../constants/responsecode');
 const crypto = require('crypto');
 
 //Service activate email
 exports.completeRegistrationService = async (email, password) => {
-  const [userRows] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-  if (userRows.length === 0) throw { status: 400, message:  message.USER.EMAIL_NOT_FOUND };
+    const [userRows] = await db.query(
+        'SELECT id FROM users WHERE email = ? LIMIT 1',
+        [email]
+    );
 
-  const userId = userRows[0].id;
+    if (userRows.length === 0) {
+        throw {
+            status: 400,
+            message: message.USER.EMAIL_NOT_FOUND,
+            responseCode: rescode.BAD_REQUEST,
+        };
+    }
 
-  const [authRows] = await db.query('SELECT id FROM user_auth WHERE user_id = ?', [userId]);
-  if (authRows.length > 0) throw { status: 400, message: message.USER.ACCOUNT_ALREADY_REGISTERED };
+    const userId = userRows[0].id;
+
+    const [authRows] = await db.query(
+        'SELECT id FROM user_auth WHERE user_id = ? LIMIT 1',
+        [userId]
+    );
+
+    if (authRows.length > 0) {
+        throw {
+            status: 400,
+            message: message.USER.ACCOUNT_ALREADY_REGISTERED,
+            responseCode: rescode.BAD_REQUEST,
+        };
+    }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -30,25 +51,25 @@ exports.completeRegistrationService = async (email, password) => {
 exports.loginService = async (email, password) => {
   const [userRows] = await db.query('SELECT id, name, role FROM users WHERE email = ?', [email]);
   if (userRows.length === 0) {
-    throw { status: 400, message: message.EMAIL_NOT_FOUND };
+    throw { status: 400, message: message.USER.EMAIL_NOT_FOUND };
   }
 
   const user = userRows[0];
 
   const [authRows] = await db.query('SELECT password FROM user_auth WHERE user_id = ?', [user.id]);
   if (authRows.length === 0) {
-    throw { status: 400, message: message.ACCOUNT_NOT_ACTIVE };
+    throw { status: 400, message: message.USER.ACCOUNT_NOT_ACTIVE };
   }
 
   const isMatch = await bcrypt.compare(password, authRows[0].password);
   if (!isMatch) {
-    throw { status: 400, message: message.INVALID_PASSWORD };
+    throw { status: 400, message: message.AUTH.INVALID_PASSWORD };
   }
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
   return {
-    message: message.LOGIN_SUCCESS,
+    message: message.AUTH.LOGIN_SUCCESS,
     token,
     user: {
       id: user.id,
@@ -59,10 +80,9 @@ exports.loginService = async (email, password) => {
   };
 };
 
-// Service: Lupa Password
 exports.forgotPasswordService = async (email) => {
   const [userRows] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
-  if (userRows.length === 0) throw { status: 400, message: message.EMAIL_NOT_FOUND };
+  if (userRows.length === 0) throw { status: 400, message: message.USER.EMAIL_NOT_FOUND };
 
   const userId = userRows[0].id;
 
@@ -77,52 +97,48 @@ exports.forgotPasswordService = async (email) => {
     [userId, token, expiresAt]
   );
 
-  // Return token untuk dikirim via email
   return {
-    message: message.FORGOT_PASSWORD_TOKEN_CREATED,
-    resetToken: token, // simulasikan dikirim via email
+    message: message.AUTH.FORGOT_PASSWORD_TOKEN_CREATED,
+    resetToken: token,
   };
 };
 
-// Service: Reset Password
 exports.resetPasswordService = async (token, newPassword) => {
   const [rows] = await db.query(
     'SELECT user_id, expires_at FROM password_resets WHERE token = ?',
     [token]
   );
 
-  if (rows.length === 0) throw { status: 400, message: message.INVALID_RESET_TOKEN };
+  if (rows.length === 0) throw { status: 400, message: message.AUTH.INVALID_RESET_TOKEN };
 
   const { user_id, expires_at } = rows[0];
   if (new Date(expires_at) < new Date()) {
-    throw { status: 400, message: message.RESET_TOKEN_EXPIRED };
+    throw { status: 400, message: message.AUTH.RESET_TOKEN_EXPIRED };
   }
 
-  // Ambil email dan role user
   const [userRows] = await db.query(
     'SELECT email, role FROM users WHERE id = ?',
     [user_id]
   );
 
   if (userRows.length === 0) {
-    throw { status: 404, message: 'User tidak ditemukan' };
+    throw { status: 404, message: message.USER.USER_NOTFOUND };
   }
 
   const { email, role } = userRows[0];
 
-  // Jika role user biasa, cek apakah pernah reset 30 hari terakhir
   if (role === 'user') {
     const [resetLogs] = await db.query(`
       SELECT created_at FROM password_resets
-      WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+      WHERE user_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)
       ORDER BY created_at DESC
       LIMIT 1
     `, [user_id]);
 
-    if (resetLogs.length > 0) {
+    if (resetLogs.length > 2) {
       throw {
         status: 403,
-        message: 'Reset password hanya diperbolehkan 1 kali dalam 30 hari untuk pengguna biasa.'
+        message: message.USER.USER_LIMIT_RESETPASS
       };
     }
   }
@@ -137,7 +153,8 @@ exports.resetPasswordService = async (token, newPassword) => {
   await db.query('DELETE FROM password_resets WHERE token = ?', [token]);
 
   return {
-    message: message.PASSWORD_RESET_SUCCESS,
+    message: message.AUTH.PASSWORD_RESET_SUCCESS,
+    resetCode: rescode.SUCCESS,
     email,
   };
 };

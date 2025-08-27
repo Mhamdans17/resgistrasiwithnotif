@@ -10,7 +10,13 @@ const logger = (req, res, next) => {
     const correlationId = req.headers['x-correlation-id'] || uuidv4();
     res.setHeader('X-Correlation-ID', correlationId);
 
-    const maskSensitiveFields = (obj, keysToMask = ['password', 'token']) => {
+    // Helper logging dengan level
+    const log = (level, message) => {
+        const timestamp = new Date().toISOString();
+        console.log(`${timestamp} | ${level.toUpperCase()} | ${message}`);
+    };
+
+    const maskSensitiveFields = (obj, keysToMask = ['password', 'token', 'resetToken']) => {
         if (!obj || typeof obj !== 'object') return obj;
 
         const masked = Array.isArray(obj) ? [...obj] : { ...obj };
@@ -21,10 +27,12 @@ const logger = (req, res, next) => {
             const value = masked[key];
 
             if (keysToMask.includes(key)) {
-                if (typeof value === 'string' && key === 'token') {
+                const partialMaskKey = ['resetToken', 'token'];
+
+                if (typeof value === 'string' && partialMaskKey.includes(key)) {
                     masked[key] = `${value.slice(0, 10)}...${value.slice(-5)}`;
                 } else {
-                    masked[key] = '************';
+                    masked[key] = '***INI PASSWORD***';
                 }
             } else if (typeof value === 'object' && value !== null) {
                 masked[key] = maskSensitiveFields(value, keysToMask);
@@ -34,29 +42,38 @@ const logger = (req, res, next) => {
         return masked;
     };
 
+    // Override res.send
     res.send = function (body) {
         responseBody = body;
         return originalSend.call(this, body);
     };
 
-
-    console.log(`\n=== REQUEST START === | Correlation ID: ${correlationId}`);
-    console.log(`[${new Date().toISOString()}] | Port ${port} | ${req.method} ${req.originalUrl}`);
-    console.log('Request Body  :', JSON.stringify(maskSensitiveFields(req.body)));
+    // Logging request
+    log('info', `== START REQUEST == | Correlation ID: ${correlationId}`);
+    log('info', `Port ${port} | ${req.method} ${req.originalUrl}`);
+    log('info', `Request Body  : ${JSON.stringify(maskSensitiveFields(req.body))}`);
 
     res.on('finish', () => {
         const duration = Date.now() - start;
 
-        console.log(`=== REQUEST FINISH === | Correlation ID: ${correlationId}`);
         if (responseBody) {
             try {
                 const parsedBody = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
-                console.log('Response Body :', JSON.stringify(maskSensitiveFields(parsedBody)));
+                const masked = JSON.stringify(maskSensitiveFields(parsedBody));
+
+                if (res.statusCode >= 400) {
+                    log('error', `Response Body : ${masked}`);
+                } else {
+                    log('info', `Response Body : ${masked}`);
+                }
             } catch (e) {
-                console.log('Response Body :', responseBody);
+                log('error', `Response Body (raw): ${responseBody}`);
             }
         }
-        console.log(`Response Status: ${res.statusCode} | Duration: ${duration}ms\n`);
+
+        const level = res.statusCode >= 400 ? 'error' : 'info';
+        log(level, `Response Status: ${res.statusCode} | Duration: ${duration}ms`);
+        log(level, `== FINISH REQUEST == | Correlation ID: ${correlationId}\n`);
     });
 
     next();

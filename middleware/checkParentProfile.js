@@ -6,7 +6,6 @@ const responseMes = require("../constants/messages")
 const checkParentProfile = async (req, res, next) => {
     try {
         const userId = req.user.userId;
-        console.log(`Mengecek parent profile untuk user_id: ${userId}`);
 
         const [rows] = await db.query(
             'SELECT * FROM parent_profiles WHERE user_id = ?',
@@ -15,7 +14,7 @@ const checkParentProfile = async (req, res, next) => {
 
         if (!rows.length) {
             return res.status(400).json({
-                message: responseMes.DATA_PARENT_NOTFOUND,
+                message: responseMes.PARENT.DATA_PARENT_NOTFOUND,
                 responseCode: responseCode.BAD_REQUEST
             });
         }
@@ -26,7 +25,7 @@ const checkParentProfile = async (req, res, next) => {
         const missingFields = requiredFields.filter(field => !profile[field]);
         if (missingFields.length > 0) {
             return res.status(400).json({
-                message:  `${responseMes.PARENT_PROFILE_UNCOMPLITE} ${missingFields.join(', ')}`,
+                message:  `${responseMes.PARENT.PARENT_PROFILE_UNCOMPLITE} ${missingFields.join(', ')}`,
                 responseCode: responseCode.BAD_REQUEST
             });
         }
@@ -34,7 +33,7 @@ const checkParentProfile = async (req, res, next) => {
         next();
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: responseMes.SERVER_ERROR });
+        res.status(500).json({ message: responseMes.GENERAL.SERVER_ERROR });
         responseCode.BAD_REQUEST;
     }
 };

@@ -20,7 +20,10 @@ exports.createUser = async (req, res) => {
     try {
         const existingUser = await userService.findUserByEmail(email);
         if (existingUser){
-            return res.status(400).json({ message: messages.USER.USER_EMAIL_EXISTS });
+            return res.status(400).json({
+                message: messages.USER.USER_EMAIL_EXISTS,
+                responseCode: responseCode.BAD_REQUEST,
+            });
         }
 
         const userId = await userService.createUser({ name, email, age });
