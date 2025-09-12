@@ -16,6 +16,7 @@ const jwt = require('jsonwebtoken');
 const redisClient = require('../utils/redis');
 const { sendResetSuccessEmail } = require('../services/email.service');
 const respMessage = require('../constants/messages');
+const respCode = require('../constants/responsecode')
 
 // COMPLETE REGISTRATION
 exports.completeRegistration = async (req, res) => {
@@ -74,7 +75,7 @@ exports.logout = async (req, res) => {
     // Simpan token ke Redis untuk blacklist
     await redisClient.setEx(`blacklist:${token}`, expiresIn, '1');
 
-    return res.status(200).json({ message: respMessage.AUTH.SUCCESS_LOGOUT });
+    return res.status(200).json({ message: respMessage.AUTH.SUCCESS_LOGOUT, responseCode: respCode.SUCCESS });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: respMessage.AUTH.FAILED_LOGOUT });

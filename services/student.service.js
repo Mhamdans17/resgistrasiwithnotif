@@ -47,3 +47,37 @@ exports.assignNis = async (id, { nisn, nis }) => {
 
     return rows[0];
 };
+
+// services/student.service.js
+exports.getIncompleteStudents = async (page = 1, limit = 5) => {
+    const offset = (page - 1) * limit;
+
+    // query data dengan paging
+    const [rows] = await db.query(
+        `
+      SELECT id, full_name, nis, nisn
+      FROM students
+      WHERE nis IS NULL OR nis = '' 
+         OR nisn IS NULL OR nisn = ''
+      LIMIT ? OFFSET ?
+    `,
+        [limit, offset]
+    );
+
+    // query total untuk hitung jumlah semua incomplete
+    const [countResult] = await db.query(
+        `
+      SELECT COUNT(*) AS total
+      FROM students
+      WHERE nis IS NULL OR nis = '' 
+         OR nisn IS NULL OR nisn = ''
+    `
+    );
+
+    return {
+        totalData: countResult[0].total,
+        page,
+        limit,
+        data: rows,
+    };
+};

@@ -3,6 +3,7 @@ const messages = require('../constants/messages');
 const responseCode = require('../constants/responsecode');
 const { studentSchema } = require('../validation/studentProfile.validation');
 const {BAD_REQUEST} = require("../constants/responsecode");
+const studenService = require('../services/student.service');
 
 exports.createStudent = async (req, res) => {
     try {
@@ -50,5 +51,23 @@ exports.assignNis = async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+};
+
+exports.getIncompleteStudents = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+
+        const result = await studentService.getIncompleteStudents(page, limit);
+
+        res.json({
+            message: "Daftar siswa dengan data NIS/NISN belum lengkap",
+            responseCode: responseCode.SUCCESS,
+            ...result,
+        });
+    } catch (err) {
+        console.error("Error getIncompleteStudents:", err);
+        res.status(500).json({ message: "Terjadi kesalahan server" });
     }
 };
