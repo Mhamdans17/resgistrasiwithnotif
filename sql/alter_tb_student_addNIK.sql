@@ -1,0 +1,2 @@
+ALTER TABLE students
+    ADD COLUMN nik VARCHAR(20) UNIQUE;

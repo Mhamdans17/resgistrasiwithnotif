@@ -5,8 +5,9 @@ const auth = require('../middleware/auth');
 const verifyTeacher = require('../middleware/adminOnly');
 const checkParentProfile = require("../middleware/checkParentProfile");
 
-router.post('/', auth, checkParentProfile, studentController.createStudent);
-router.post('/:id/assign-nis', auth, verifyTeacher, studentController.assignNis);
-router.get("/incomplete", auth, studentController.getIncompleteStudents);
+router.post('/add', auth, checkParentProfile, studentController.createStudent);
+router.post('/assign-nis', auth, verifyTeacher, studentController.assignNis);
+router.get("/incomplete", auth, verifyTeacher, studentController.getIncompleteStudents);
+router.get('/list', auth, studentController.getStudents);
 
 module.exports = router;

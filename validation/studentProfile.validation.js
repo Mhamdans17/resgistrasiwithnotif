@@ -5,6 +5,16 @@ exports.studentSchema = Joi.object({
         'string.empty': 'Nama lengkap wajib diisi',
         'any.required': 'Nama lengkap wajib diisi'
     }),
+    nik: Joi.string()
+        .pattern(/^[0-9]+$/)
+        .length(16)
+        .required()
+        .messages({
+            'string.empty': 'NIK wajib diisi',
+            'any.required': 'NIK wajib diisi',
+            'string.pattern.base': 'NIK hanya boleh berisi angka',
+            'string.length': 'NIK harus 16 digit'
+        }),
     nickname: Joi.string().required().messages({
         'string.empty': 'Nama panggilan wajib diisi',
         'any.required': 'Nama panggilan wajib diisi'

@@ -3,14 +3,26 @@ const db = require('../config/db');
 const resMessage = require('../constants/messages');
 
 exports.createStudent = async (parentId, data) => {
+    const [existing] = await db.query(
+        `SELECT id FROM students WHERE nik = ?`,
+        [data.nik]
+    );
+
+    if (existing.length > 0) {
+        const error = new Error("NIK sudah terdaftar");
+        error.statusCode = 400;
+        throw error;
+    }
+
     const sql = `
         INSERT INTO students
-        (parent_id, full_name, nickname, birth_place, birth_date, gender, religion,
+        (parent_id, nik, full_name, nickname, birth_place, birth_date, gender, religion,
          address, rt_rw, village, district, nationality, child_number, siblings_count)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
         parentId,
+        data.nik,
         data.full_name,
         data.nickname,
         data.birth_place,
@@ -23,7 +35,7 @@ exports.createStudent = async (parentId, data) => {
         data.district,
         data.nationality,
         data.child_number,
-        data.siblings_count
+        data.siblings_count,
     ];
 
     const [result] = await db.execute(sql, values);
@@ -31,14 +43,16 @@ exports.createStudent = async (parentId, data) => {
     return rows[0] || null;
 };
 
-exports.assignNis = async (id, { nisn, nis }) => {
+
+exports.assignNis = async ({ full_name, nik, nisn, nis }) => {
     await db.query(
-        'UPDATE students SET nisn = ?, nis = ? WHERE id = ?',
-        [nisn, nis, id]
+        'UPDATE students SET nisn = ?, nis = ? WHERE full_name= ? AND nik= ?',
+        [nisn, nis, full_name, nik]
     );
+
     const [rows] = await db.query(
-        'SELECT id, full_name, nis, nisn, gender, birth_date, address FROM students WHERE id = ?',
-        [id]
+        'SELECT id, nik, full_name, nis, nisn, gender, birth_date, address FROM students WHERE full_name = ? AND nik = ?',
+        [full_name, nik]
     );
 
     if (rows.length === 0) {
@@ -55,7 +69,7 @@ exports.getIncompleteStudents = async (page = 1, limit = 5) => {
     // query data dengan paging
     const [rows] = await db.query(
         `
-      SELECT id, full_name, nis, nisn
+      SELECT id, nik, full_name, nis, nisn
       FROM students
       WHERE nis IS NULL OR nis = '' 
          OR nisn IS NULL OR nisn = ''
@@ -64,7 +78,6 @@ exports.getIncompleteStudents = async (page = 1, limit = 5) => {
         [limit, offset]
     );
 
-    // query total untuk hitung jumlah semua incomplete
     const [countResult] = await db.query(
         `
       SELECT COUNT(*) AS total
@@ -81,3 +94,11 @@ exports.getIncompleteStudents = async (page = 1, limit = 5) => {
         data: rows,
     };
 };
+
+exports.getStudentsByParentId = async (parentId) => {
+    const [rows] = await db.query(
+        'SELECT * FROM students WHERE parent_id = ?',
+        [parentId]
+    );
+    return rows;
+}
