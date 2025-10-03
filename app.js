@@ -18,7 +18,7 @@ app.use(logger);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/parent-profile', parentProfileRoutes);
+app.use('/api/parent', parentProfileRoutes);
 app.use('/api/student', studentRoutes);
 
 const PORT = process.env.PORT || 3000;

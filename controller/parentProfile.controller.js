@@ -9,7 +9,7 @@ exports.completeParentProfile = async (req, res) => {
 
         if (error) {
             return res.status(400).json({
-                message: 'Validasi gagal',
+                message: 'VALIDASI GAGAL',
                 responseCode: responseCode.BAD_REQUEST,
                 errors: error.details.map(e => e.message)
             });
@@ -21,13 +21,13 @@ exports.completeParentProfile = async (req, res) => {
         const dataprofile = await parentProfileService.createOrUpdateParentProfile(userId, profileData);
 
         return res.status(200).json({
-            message: 'Profil wali murid berhasil diperbarui',
+            message: 'PROFIL WALI MURID BERHASIL DIPERBARUI',
             responseCode: responseCode.SUCCESS,
             data: dataprofile
         });
 
     } catch (err) {
-        console.error('Update wali murid error:', err);
+        console.error('UPDATE WALI MURID ERROR:', err);
         return res.status(500).json({
             message: messages.GENERAL.SERVER_ERROR,
             responseCode: responseCode.SERVER_ERROR
@@ -43,13 +43,13 @@ exports.getParentProfile = async (req, res) => {
 
         if (!profile) {
             return res.status(404).json({
-                message: 'Data wali murid tidak ditemukan',
+                message: 'DATA WALI MURID TIDAK DITEMUKAN',
                 responseCode: responseCode.BAD_REQUEST
             });
         }
 
         return res.status(200).json({
-            message: 'Data wali murid ditemukan',
+            message: 'DATA WALI MURID DITEMUKAN',
             responseCode: responseCode.SUCCESS,
             data: profile
         });

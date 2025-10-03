@@ -1,0 +1,2 @@
+ALTER TABLE admin_list
+    ADD COLUMN role VARCHAR(20);

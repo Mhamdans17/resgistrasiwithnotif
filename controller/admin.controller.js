@@ -1,6 +1,7 @@
 const { addAdminEmail, getAllAdmins } = require('../services/admin.service');
 const { addAdminSchema } = require('../validation/admin.validation');
 const message = require('../constants/messages')
+const responseCode = require('../constants/responseCode');
 
 exports.addAdmin = async (req, res) => {
   const { error, value } = addAdminSchema.validate(req.body);
@@ -10,9 +11,12 @@ exports.addAdmin = async (req, res) => {
   }
 
   try {
-    const { email } = value; 
-    const result = await addAdminEmail(email);
-    res.status(200).json({ message: message.ADMIN.SUCCESS_ADD_ADMIN, data: result });
+    const { email, role } = value;
+    const result = await addAdminEmail(email, role);
+    res.status(200).json({
+        message: message.ADMIN.SUCCESS_ADD_ADMIN,
+        responseCode: responseCode.SUCCESS,
+        data: result });
   } catch (err) {
     res.status(err.status || 500).json({ message: err.message || message.ADMIN.FAILED_ADD_ADMIN });
   }

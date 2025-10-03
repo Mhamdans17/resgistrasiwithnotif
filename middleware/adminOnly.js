@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const message = require('../constants/messages')
+const ROLEUSER = process.env.USERADMIN;
 
 const adminOnly = async (req, res, next) => {
   const user = req.user;
@@ -11,7 +12,7 @@ const adminOnly = async (req, res, next) => {
   try {
     const [rows] = await db.query('SELECT role FROM users WHERE id = ?', [user.userId]);
 
-    if (rows.length === 0 || rows[0].role !== 'admin') {
+    if (rows.length === 0 || rows[0].role !== ROLEUSER) {
       return res.status(403).json({ message: message.ADMIN.FORBIDEN_ACCESS });
     }
 

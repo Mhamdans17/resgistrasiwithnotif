@@ -65,6 +65,7 @@ exports.getParentProfileById = async (id) => {
             p.birth_date,
             p.gender,
             s.id AS student_id,
+            s.nik,
             s.full_name AS student_name,
             s.nickname,
             s.birth_place,
@@ -101,6 +102,7 @@ exports.getParentProfileById = async (id) => {
             .map(r => ({
                 id: r.student_id,
                 full_name: r.student_name,
+                nik: r.nik,
                 nickname: r.nickname,
                 birth_place: r.birth_place,
                 birth_date: r.student_birth_date,

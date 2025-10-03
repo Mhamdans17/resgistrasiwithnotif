@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const message = require('../constants/messages')
 
+
 const userOnly = async (req, res, next) => {
     const user = req.user;
 
