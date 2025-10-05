@@ -73,7 +73,7 @@ const logger = (req, res, next) => {
 
         const level = res.statusCode >= 400 ? 'error' : 'info';
         log(level, `Response Status: ${res.statusCode} | Duration: ${duration}ms`);
-        log(level, `== FINISH REQUEST == | Correlation ID: ${correlationId}\n`);
+        log(level, `== FINISH REQUEST == | Correlation ID: ${correlationId}`);
     });
 
     next();

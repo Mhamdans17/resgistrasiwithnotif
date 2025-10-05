@@ -1,24 +1,23 @@
 const db = require('../config/db');
 
-async function isAdminEmail(email) {
-  const sql = 'SELECT 1 FROM admin_list WHERE email = ? LIMIT 1';
-  const [rows] = await db.query(sql, [email]);
-  return rows.length > 0;
-}
-
 exports.findUserByEmail = async (email) => {
-  const sql = 'SELECT id FROM users WHERE email = ?';
-  const [rows] = await db.query(sql, [email]);
-  return rows[0];
+    const sql = 'SELECT id FROM users WHERE email = ?';
+    const [rows] = await db.query(sql, [email]);
+    return rows[0];
 };
 
 exports.createUser = async ({ name, email, age }) => {
-  const isAdmin = await isAdminEmail(email);
-  const role = isAdmin ? 'admin' : 'user';
+    const [roleRows] = await db.query(
+        'SELECT role FROM admin_list WHERE email = ? LIMIT 1',
+        [email]
+    );
+    const role = roleRows[0]?.role || 'user';
+    const [result] = await db.query(
+        'INSERT INTO users (name, email, age, role) VALUES (?, ?, ?, ?)',
+        [name, email, age, role]
+    );
 
-  const sql = 'INSERT INTO users (name, email, age, role) VALUES (?, ?, ?, ?)';
-  const [result] = await db.query(sql, [name, email, age, role]);
-  return result.insertId;
+    return result.insertId;
 };
 
 // Update profile guru
@@ -32,6 +31,18 @@ exports.updateTeacherProfile = async (userId, profileData) => {
         education,
         subject_specialization
     } = profileData;
+
+    const [existing] = await db.query(
+        'SELECT user_id FROM teacher_profiles WHERE nip = ? AND user_id != ?',
+        [nip, userId]
+    );
+
+    if (existing.length > 0) {
+        // lempar error ke controller biar ditangkap di catch
+        const error = new Error('NIP_ALREADY_EXISTS');
+        error.code = 'NIP_ALREADY_EXISTS';
+        throw error;
+    }
 
     await db.query(`
         INSERT INTO teacher_profiles 

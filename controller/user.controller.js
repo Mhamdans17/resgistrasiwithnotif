@@ -71,6 +71,13 @@ exports.completeTeacherProfile = async (req, res) => {
 
     } catch (err) {
         console.error('Update profile error:', err);
+
+        if (err.code === 'NIP_ALREADY_EXISTS'){
+            return res.status(400).json({
+                messages: 'NIP sudah digunakan oleh guru lain',
+                responseCode: responseCode.BAD_REQUEST
+            })
+        }
         return res.status(500).json({ message: messages.GENERAL.SERVER_ERROR });
     }
 };
